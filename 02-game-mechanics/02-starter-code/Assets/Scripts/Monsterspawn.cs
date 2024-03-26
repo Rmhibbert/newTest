@@ -4,26 +4,46 @@ using UnityEngine;
 
 public class Monsterspawn : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public MonsterData MonsterPrefab;
+    private MonsterData placedMonster = null;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    public GameObject MonsterPrefab;
-    private GameObject placedMonster = null;
     void OnMouseUp()
     {
         if (placedMonster == null)
         {
-            placedMonster = Instantiate(MonsterPrefab, transform.position, Quaternion.identity);
+            if (CanPlaceMonster())
+            {
+                PlaceMonster();
+            }
+
         }
-        
+        else if (CanUpgradeMonster())
+        {
+            UpgradeMonster();
+        }
+    }
+
+    private bool CanUpgradeMonster()
+    {
+        return placedMonster != null &&
+            placedMonster.GetNextLevel() != null &&
+            GameManager.Instance.Gold >= placedMonster.GetNextLevel().cost;
+    }
+
+    public void UpgradeMonster()
+    {
+        placedMonster.IncreaseLevel();
+        GameManager.Instance.Gold -= placedMonster.CurrentLevel.cost;
+    }
+
+    private bool CanPlaceMonster()
+    {
+        return placedMonster == null && GameManager.Instance.Gold >= MonsterPrefab.levels[0].cost;
+    }
+
+    public void PlaceMonster()
+    {
+        placedMonster = Instantiate(MonsterPrefab, transform.position, Quaternion.identity);
+        GameManager.Instance.Gold -= MonsterPrefab.levels[0].cost;
     }
 }
